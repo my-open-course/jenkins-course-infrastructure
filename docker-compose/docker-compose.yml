@@ -1,15 +1,75 @@
 version: '3.7'
 
+networks:
+  jenkins_network:
+    external: true
+
 services:
   jenkins-in-docker:
     image: jenkins/jenkins:lts-slim-jdk8
     container_name: jenkins-in-docker
-    restart: on-failure:3
+    privileged: true
+    restart: unless-stopped
     ports:
       - "8080:8080"
       - "50000:50000"
-    volumes:
-      - jenkins_home:/var/jenkins_home
     environment:
-      JAVA_OPTS: "-Dfile.encoding=UTF-8"
-      JENKINS_OPTS: ""
+      JAVA_OPTS: "-Xmx4096m -Xms1024m -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Asia/Shanghai -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"
+    volumes:
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker_data/jenkins/jenkins_home:/var/jenkins_home
+      - ./docker_data/jenkins/jenkins_home_bak:/var/jenkins_home_bak
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+          cpus: '2'
+    networks:
+      - jenkins_network
+
+  postgres-in-docker:
+    image: postgres:13.6
+    container_name: postgres-in-docker
+    restart: on-failure:3
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminPwd_Postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./docker_data/postgresql/data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '2'
+    networks:
+      - jenkins_network
+
+  sonarqube-in-docker:
+    image: sonarqube:lts-community
+    container_name: sonarqube-in-docker
+    restart: on-failure:3
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-in-docker:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - ./docker_data/sonarqube/logs:/opt/sonarqube/logs
+      - ./docker_data/sonarqube/data:/opt/sonarqube/data
+      - ./docker_data/sonarqube/extensions:/opt/sonarqube/extensions
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+          cpus: '2'
+    ulimits:
+      nofile:
+        hard: 262144
+        soft: 262144
+    networks:
+      - jenkins_network
