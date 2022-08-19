@@ -26,6 +26,7 @@ Jenkins:
 sudo chown -R 1000:1000 docker_data/jenkins
 
 /var/jenkins_home/secrets/initialAdminPassword
+docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 
 admin
 adminPwd_Jenkins
