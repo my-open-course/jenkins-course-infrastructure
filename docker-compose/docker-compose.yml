@@ -68,6 +68,7 @@ services:
           memory: 4096M
           cpus: '2'
     ulimits:
+      nproc: 65535
       nofile:
         hard: 262144
         soft: 262144
