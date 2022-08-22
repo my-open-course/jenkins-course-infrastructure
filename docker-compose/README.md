@@ -3,6 +3,10 @@ sonarqube:
 
 sysctl -w vm.max_map_count=262144
 
+vim /etc/sysctl.conf
+
+echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+
 
 CREATE DATABASE yourdbname;
 CREATE USER youruser WITH ENCRYPTED PASSWORD 'yourpass';
