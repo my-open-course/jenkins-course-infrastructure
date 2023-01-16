@@ -1,0 +1,54 @@
+version: '3.7'
+
+networks:
+  jenkins_network:
+    external: true
+
+services:
+
+  postgres-in-docker:
+    image: postgres:13.6
+    container_name: postgres-in-docker
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminPwd_Postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./docker_data/postgresql/data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '2'
+    networks:
+      - jenkins_network
+
+  sonarqube-in-docker:
+    image: sonarqube:8.9.8-enterprise
+    container_name: sonarqube-in-docker
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-in-docker:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - ./docker_data/sonarqube/logs:/opt/sonarqube/logs
+      - ./docker_data/sonarqube/data:/opt/sonarqube/data
+      - ./docker_data/sonarqube/extensions:/opt/sonarqube/extensions
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+          cpus: '2'
+    ulimits:
+      nproc: 65535
+      nofile:
+        hard: 262144
+        soft: 262144
+    networks:
+      - jenkins_network

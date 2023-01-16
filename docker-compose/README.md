@@ -20,6 +20,9 @@ GRANT ALL PRIVILEGES ON DATABASE sonar TO sonar;
 
 admin
 adminPwd_Sonar
+
+echo "sonar.web.javaOpts=-javaagent:/opt/sonarqube/SonarQubeAgent-1.1-SNAPSHOT.jar" >> /opt/sonarqube/conf/sonar.properties
+echo "sonar.ce.javaOpts=-javaagent:/opt/sonarqube/SonarQubeAgent-1.1-SNAPSHOT.jar" >> /opt/sonarqube/conf/sonar.properties
 ```
 
 
